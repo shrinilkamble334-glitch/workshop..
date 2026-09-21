@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cravex Digital — Food Service Operations, Run Digitally</title>
+<style>
+  :root{
+    --ink:#14110f;
+    --char:#1d1713;
+    --char-2:#241b16;
+    --bone:#f4ede1;
+    --bone-dim:#c9beac;
+    --chili:#e4572e;
+    --chili-dim:#a83f21;
+    --saffron:#f2a93b;
+    --herb:#7a9e7e;
+    --line:rgba(244,237,225,0.12);
+    --radius-lg: 28px;
+    --radius-sm: 10px;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", "URW Palladio L", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--bone);
+    font-family:var(--sans);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+
+  img,svg{ display:block; max-width:100%; }
+
+  ::selection{ background:var(--chili); color:var(--ink); }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 40px;
+  }
+
+  /* ---------- background texture ---------- */
+  .grain-mesh{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    background:
+      radial-gradient(ellipse 900px 560px at 12% -8%, rgba(228,87,46,0.22), transparent 60%),
+      radial-gradient(ellipse 700px 700px at 108% 18%, rgba(242,169,59,0.14), transparent 55%),
+      radial-gradient(ellipse 800px 640px at 50% 118%, rgba(122,158,126,0.10), transparent 55%);
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:fixed;
+    top:0; left:0; right:0;
+    z-index:100;
+    padding:22px 0;
+    background:rgba(20,17,15,0.72);
+    backdrop-filter:blur(14px) saturate(140%);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    border-bottom:1px solid transparent;
+    transition:border-color .4s ease, padding .35s ease;
+  }
+  header.scrolled{
+    border-bottom-color:var(--line);
+    padding:14px 0;
+  }
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--serif);
+    font-size:1.28rem;
+    letter-spacing:.2px;
+    font-weight:700;
+    color:var(--bone);
+  }
+  .logo .mark{
+    width:30px; height:30px;
+    border-radius:50%;
+    background:conic-gradient(from 200deg, var(--chili), var(--saffron), var(--herb), var(--chili));
+    box-shadow:0 0 0 1px rgba(244,237,225,0.18), 0 6px 18px rgba(228,87,46,0.35);
+  }
+  .nav-links{
+    display:flex;
+    gap:34px;
+    font-size:.95rem;
+    color:var(--bone-dim);
+  }
+  .nav-links a{ transition:color .25s ease; position:relative; }
+  .nav-links a:hover{ color:var(--bone); }
+  .nav-cta{
+    padding:11px 22px;
+    border-radius:100px;
+    background:var(--bone);
+    color:var(--ink);
+    font-size:.9rem;
+    font-weight:600;
+    border:1px solid var(--bone);
+    transition:transform .25s ease, background .25s ease, color .25s ease;
+  }
+  .nav-cta:hover{ background:transparent; color:var(--bone); transform:translateY(-1px); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    padding:196px 0 120px;
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:40px;
+    align-items:center;
+    z-index:1;
+  }
+  .eyebrow-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:26px;
+    color:var(--bone-dim);
+    font-size:.86rem;
+  }
+  .eyebrow-row .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--chili);
+    box-shadow:0 0 0 4px rgba(228,87,46,0.18);
+  }
+  .hero h1{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(2.6rem, 4.6vw, 4.1rem);
+    line-height:1.06;
+    letter-spacing:-0.5px;
+    margin:0 0 26px;
+    max-width:11.5ch;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--chili);
+  }
+  .hero p.lead{
+    font-size:1.1rem;
+    color:var(--bone-dim);
+    max-width:44ch;
+    margin:0 0 38px;
+  }
+  .hero-actions{
+    display:flex;
+    align-items:center;
+    gap:22px;
+  }
+  .btn-primary{
+    padding:15px 30px;
+    border-radius:100px;
+    background:var(--chili);
+    color:var(--ink);
+    font-weight:700;
+    font-size:.96rem;
+    box-shadow:0 14px 34px -12px rgba(228,87,46,0.65);
+    transition:transform .3s ease, box-shadow .3s ease, background .3s ease;
+    border:1px solid var(--chili);
+    display:inline-block;
+  }
+  .btn-primary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 18px 40px -10px rgba(228,87,46,0.8);
+  }
+  .btn-ghost{
+    font-size:.95rem;
+    color:var(--bone);
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    border-bottom:1px solid rgba(244,237,225,0.3);
+    padding-bottom:3px;
+    transition:border-color .25s ease, opacity .25s ease;
+  }
+  .btn-ghost:hover{ border-color:var(--bone); }
+
+  .hero-proof{
+    margin-top:54px;
+    display:flex;
+    gap:38px;
+    color:var(--bone-dim);
+    font-size:.82rem;
+  }
+  .hero-proof b{
+    display:block;
+    color:var(--bone);
+    font-family:var(--serif);
+    font-size:1.5rem;
+    font-weight:600;
+  }
+
+  /* ---------- 3D hero visual ---------- */
+  .stage{
+    position:relative;
+    height:520px;
+    perspective:1400px;
+  }
+  .orbit-system{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform-style:preserve-3d;
+    animation:driftFloat 8s ease-in-out infinite;
+  }
+  @keyframes driftFloat{
+    0%,100%{ transform:translateY(0px) rotateX(6deg); }
+    50%{ transform:translateY(-16px) rotateX(2deg); }
+  }
+  .plate{
+    position:relative;
+    width:340px;
+    height:340px;
+    border-radius:50%;
+    transform-style:preserve-3d;
+    animation:spinPlate 22s linear infinite;
+    background:
+      radial-gradient(circle at 35% 30%, #2c2019, #1a130f 62%),
+      conic-gradient(from 0deg, rgba(228,87,46,0.35), rgba(242,169,59,0.25), rgba(122,158,126,0.2), rgba(228,87,46,0.35));
+    box-shadow:
+      0 0 0 1px rgba(244,237,225,0.08),
+      0 60px 90px -30px rgba(0,0,0,0.75),
+      inset 0 0 60px rgba(0,0,0,0.55),
+      inset 0 0 0 14px rgba(244,237,225,0.04);
+  }
+  @keyframes spinPlate{
+    from{ transform:rotateY(0deg) rotateX(58deg); }
+    to{ transform:rotateY(360deg) rotateX(58deg); }
+  }
+  .plate::before{
+    content:"";
+    position:absolute;
+    inset:44px;
+    border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #3a2a1f, #171009 70%);
+    box-shadow:inset 0 0 40px rgba(0,0,0,0.6);
+  }
+  .crumb{
+    position:absolute;
+    border-radius:50%;
+    transform-style:preserve-3d;
+  }
+  .crumb1{ width:34px; height:34px; top:26%; left:20%; background:radial-gradient(circle at 35% 30%, var(--chili), var(--chili-dim)); transform:translateZ(70px); box-shadow:0 20px 30px -10px rgba(228,87,46,0.6);}
+  .crumb2{ width:26px; height:26px; top:60%; left:66%; background:radial-gradient(circle at 35% 30%, var(--saffron), #c9821f); transform:translateZ(90px); box-shadow:0 20px 26px -10px rgba(242,169,59,0.55);}
+  .crumb3{ width:20px; height:20px; top:18%; left:62%; background:radial-gradient(circle at 35% 30%, var(--herb), #4d6b52); transform:translateZ(60px); box-shadow:0 16px 22px -8px rgba(122,158,126,0.5);}
+  .crumb4{ width:16px; height:16px; top:70%; left:30%; background:radial-gradient(circle at 35% 30%, var(--bone), var(--bone-dim)); transform:translateZ(50px); box-shadow:0 14px 20px -8px rgba(0,0,0,0.4);}
+
+  .ring{
+    position:absolute;
+    border:1px solid rgba(244,237,225,0.14);
+    border-radius:50%;
+    transform-style:preserve-3d;
+  }
+  .ring1{ width:440px; height:440px; transform:rotateX(72deg); animation:ringspin 30s linear infinite; }
+  .ring2{ width:500px; height:500px; transform:rotateX(72deg) rotateZ(40deg); animation:ringspin 40s linear infinite reverse; }
+  @keyframes ringspin{ from{ transform:rotateX(72deg) rotateZ(0deg); } to{ transform:rotateX(72deg) rotateZ(360deg); } }
+
+  .stat-chip{
+    position:absolute;
+    padding:12px 16px;
+    border-radius:14px;
+    background:rgba(36,27,22,0.85);
+    border:1px solid var(--line);
+    backdrop-filter:blur(10px);
+    font-size:.8rem;
+    color:var(--bone-dim);
+    box-shadow:0 20px 40px -20px rgba(0,0,0,0.6);
+  }
+  .stat-chip b{ color:var(--bone); font-family:var(--serif); font-size:1.1rem; display:block; }
+  .chip-a{ top:8%; right:2%; }
+  .chip-b{ bottom:10%; left:0%; }
+
+  /* ---------- marquee ---------- */
+  .marquee-belt{
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:22px 0;
+    overflow:hidden;
+    white-space:nowrap;
+    position:relative;
+    z-index:1;
+  }
+  .marquee-track{
+    display:inline-flex;
+    gap:60px;
+    animation:scrollLeft 26s linear infinite;
+    font-family:var(--serif);
+    font-size:1.05rem;
+    color:var(--bone-dim);
+  }
+  .marquee-track span{ display:inline-flex; align-items:center; gap:60px; }
+  .marquee-track em{ color:var(--chili); font-style:normal; }
+  @keyframes scrollLeft{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+  /* ---------- section shell ---------- */
+  section{ position:relative; z-index:1; padding:130px 0; }
+  .section-head{
+    max-width:640px;
+    margin-bottom:64px;
+  }
+  .kicker{
+    color:var(--chili);
+    font-size:.85rem;
+    font-weight:600;
+    margin-bottom:14px;
+    display:block;
+  }
+  .section-head h2{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(2rem, 3.2vw, 2.7rem);
+    line-height:1.16;
+    margin:0 0 18px;
+    letter-spacing:-0.3px;
+  }
+  .section-head p{
+    color:var(--bone-dim);
+    font-size:1.04rem;
+    max-width:52ch;
+  }
+
+  .reveal{ opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s ease; }
+  .reveal.in-view{ opacity:1; transform:translateY(0); }
+
+  /* ---------- services ---------- */
+  .service-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:26px;
+  }
+  .tilt-card{
+    padding:38px 32px;
+    border-radius:var(--radius-lg);
+    background:linear-gradient(155deg, var(--char-2), var(--char));
+    border:1px solid var(--line);
+    transform-style:preserve-3d;
+    will-change:transform;
+    transition:transform .12s ease, border-color .3s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .tilt-card::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%), rgba(228,87,46,0.14), transparent 60%);
+    opacity:0;
+    transition:opacity .3s ease;
+  }
+  .tilt-card:hover::after{ opacity:1; }
+  .tilt-card:hover{ border-color:rgba(228,87,46,0.4); }
+  .card-icon{
+    width:52px; height:52px;
+    border-radius:15px;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:26px;
+    background:rgba(228,87,46,0.14);
+    color:var(--chili);
+    transform:translateZ(30px);
+  }
+  .tilt-card h3{
+    font-family:var(--serif);
+    font-size:1.32rem;
+    font-weight:600;
+    margin:0 0 12px;
+    transform:translateZ(20px);
+  }
+  .tilt-card p{
+    color:var(--bone-dim);
+    font-size:.96rem;
+    margin:0 0 20px;
+    transform:translateZ(16px);
+  }
+  .card-tag{
+    font-size:.8rem;
+    color:var(--saffron);
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+    transform:translateZ(20px);
+  }
+
+  /* ---------- process ---------- */
+  .process-list{
+    display:flex;
+    flex-direction:column;
+  }
+  .process-row{
+    display:grid;
+    grid-template-columns:90px 1fr 1.1fr;
+    gap:30px;
+    align-items:start;
+    padding:34px 0;
+    border-top:1px solid var(--line);
+  }
+  .process-row:last-child{ border-bottom:1px solid var(--line); }
+  .process-num{
+    font-family:var(--serif);
+    font-size:1.1rem;
+    color:var(--chili);
+  }
+  .process-row h3{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:1.28rem;
+    margin:0;
+  }
+  .process-row p{
+    color:var(--bone-dim);
+    margin:0;
+    font-size:.98rem;
+    max-width:52ch;
+  }
+
+  /* ---------- stats ---------- */
+  .stats-panel{
+    border-radius:var(--radius-lg);
+    background:linear-gradient(150deg, #241a15, #171310);
+    border:1px solid var(--line);
+    padding:64px 56px;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:20px;
+  }
+  .stat-block b{
+    font-family:var(--serif);
+    font-size:clamp(2.1rem, 3vw, 2.7rem);
+    display:block;
+    color:var(--bone);
+    font-weight:600;
+  }
+  .stat-block span{
+    color:var(--bone-dim);
+    font-size:.88rem;
+  }
+
+  /* ---------- testimonial ---------- */
+  .quote-panel{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:36px;
+    align-items:center;
+  }
+  .quote-mark{
+    font-family:var(--serif);
+    font-size:6rem;
+    color:var(--chili);
+    line-height:1;
+    opacity:.85;
+  }
+  blockquote{
+    margin:0;
+    font-family:var(--serif);
+    font-size:clamp(1.4rem, 2.4vw, 1.9rem);
+    line-height:1.4;
+    font-weight:500;
+  }
+  .quote-attr{
+    margin-top:26px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    color:var(--bone-dim);
+    font-size:.92rem;
+  }
+  .quote-avatar{
+    width:44px; height:44px; border-radius:50%;
+    background:conic-gradient(from 120deg, var(--chili), var(--saffron), var(--herb));
+  }
+
+  /* ---------- cta banner ---------- */
+  .cta-banner{
+    border-radius:var(--radius-lg);
+    padding:76px 60px;
+    background:radial-gradient(circle at 20% 20%, rgba(228,87,46,0.35), transparent 55%), var(--char-2);
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:40px;
+  }
+  .cta-banner h2{
+    font-family:var(--serif);
+    font-size:clamp(1.9rem, 3vw, 2.5rem);
+    font-weight:600;
+    margin:0 0 12px;
+    max-width:14ch;
+  }
+  .cta-banner p{ color:var(--bone-dim); margin:0; max-width:40ch; }
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:70px 0 40px;
+    position:relative;
+    z-index:1;
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:1.4fr 1fr 1fr 1fr;
+    gap:40px;
+    margin-bottom:60px;
+  }
+  .footer-grid h4{
+    font-size:.82rem;
+    color:var(--bone-dim);
+    margin:0 0 18px;
+    font-weight:600;
+  }
+  .footer-grid ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; font-size:.92rem; }
+  .footer-grid ul a{ color:var(--bone-dim); transition:color .25s ease; }
+  .footer-grid ul a:hover{ color:var(--bone); }
+  .footer-brand p{ color:var(--bone-dim); font-size:.94rem; max-width:34ch; margin-top:14px; }
+  .footer-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:28px;
+    border-top:1px solid var(--line);
+    color:var(--bone-dim);
+    font-size:.82rem;
+  }
+
+  @media (max-width: 980px){
+    .wrap{ padding:0 24px; }
+    .hero{ grid-template-columns:1fr; padding-top:150px; }
+    .stage{ height:380px; order:-1; }
+    .nav-links{ display:none; }
+    .service-grid{ grid-template-columns:1fr; }
+    .process-row{ grid-template-columns:1fr; gap:10px; }
+    .stats-panel{ grid-template-columns:repeat(2, 1fr); }
+    .quote-panel{ grid-template-columns:1fr; }
+    .cta-banner{ flex-direction:column; text-align:center; }
+    .footer-grid{ grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain-mesh"></div>
+
+<header id="siteHeader">
+  <div class="wrap nav">
+    <div class="logo"><span class="mark"></span>Cravex Digital</div>
+    <nav class="nav-links">
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a href="#stats">Results</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href="#contact" class="nav-cta">Book a demo</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap" style="display:contents;">
+    <div>
+      <div class="eyebrow-row"><span class="dot"></span> Operations software for restaurant &amp; food brands</div>
+      <h1>The kitchen runs the food. <em>We run</em> everything around it.</h1>
+      <p class="lead">Cravex Digital connects ordering, kitchen routing, delivery and inventory into one system — so multi-location food businesses stop losing money to spreadsheets and side channels.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">Book a demo</a>
+        <a href="#services" class="btn-ghost">See what it replaces →</a>
+      </div>
+      <div class="hero-proof">
+        <div><b>310+</b>brands on Cravex</div>
+        <div><b>41%</b>fewer order errors</div>
+        <div><b>6.2s</b>avg. order-to-kitchen time</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="orbit-system">
+        <div class="ring ring1"></div>
+        <div class="ring ring2"></div>
+        <div class="plate">
+          <div class="crumb crumb1"></div>
+          <div class="crumb crumb2"></div>
+          <div class="crumb crumb3"></div>
+          <div class="crumb crumb4"></div>
+        </div>
+      </div>
+      <div class="stat-chip chip-a"><b>+18%</b>ticket size</div>
+      <div class="stat-chip chip-b"><b>99.95%</b>uptime</div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee-belt">
+  <div class="marquee-track" id="marqueeTrack">
+    <span>Cloud kitchens <em>·</em> Quick-service chains <em>·</em> Catering groups <em>·</em> Ghost delivery brands <em>·</em> Franchise networks <em>·</em> Independent restaurants</span>
+    <span>Cloud kitchens <em>·</em> Quick-service chains <em>·</em> Catering groups <em>·</em> Ghost delivery brands <em>·</em> Franchise networks <em>·</em> Independent restaurants</span>
+  </div>
+</div>
+
+<section id="services">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">What Cravex runs</span>
+      <h2>Three systems, replaced by one.</h2>
+      <p>Most food businesses stitch together an ordering app, a POS, and a delivery board that don't talk to each other. Cravex is the layer that connects them.</p>
+    </div>
+
+    <div class="service-grid">
+      <div class="tilt-card">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v6H4z" stroke="currentColor" stroke-width="1.6"/><path d="M4 14h16v6H4z" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <h3>Digital ordering</h3>
+        <p>Branded ordering pages, kiosk and delivery-app orders land in one queue, priced and routed the way each location actually operates.</p>
+        <div class="card-tag">Web, kiosk, app &amp; marketplace →</div>
+      </div>
+
+      <div class="tilt-card">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <h3>Kitchen routing</h3>
+        <p>Tickets sort themselves to the right station and location by prep time and load, so the line never finds out an order existed 8 minutes late.</p>
+        <div class="card-tag">Live prep-time balancing →</div>
+      </div>
+
+      <div class="tilt-card">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 12h5l2-7 4 14 2-7h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Delivery &amp; inventory</h3>
+        <p>Every completed order deducts stock automatically and pulls the nearest courier — no separate delivery board, no manual counts at close.</p>
+        <div class="card-tag">Auto stock deduction →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Getting started</span>
+      <h2>Live in four steps, not four months.</h2>
+      <p>Cravex is built to sit on top of what a kitchen already does — not force a new workflow on day one.</p>
+    </div>
+
+    <div class="process-list">
+      <div class="process-row">
+        <span class="process-num">01</span>
+        <h3>Connect your menu</h3>
+        <p>Import your existing menu, pricing and modifiers from your current POS or spreadsheet in one pass.</p>
+      </div>
+      <div class="process-row">
+        <span class="process-num">02</span>
+        <h3>Map your locations</h3>
+        <p>Set prep times, station capacity and delivery radius per site — Cravex uses this to route every order correctly from day one.</p>
+      </div>
+      <div class="process-row">
+        <span class="process-num">03</span>
+        <h3>Turn on channels</h3>
+        <p>Switch on web ordering, kiosk, and marketplace integrations individually, in whatever order fits your rollout.</p>
+      </div>
+      <div class="process-row">
+        <span class="process-num">04</span>
+        <h3>Watch it run</h3>
+        <p>Orders, prep times and stock levels appear on one live dashboard across every location, updated in real time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stats">
+  <div class="wrap">
+    <div class="stats-panel reveal">
+      <div class="stat-block"><b class="counter" data-target="310">0</b><span>food brands on Cravex</span></div>
+      <div class="stat-block"><b class="counter" data-target="41" data-suffix="%">0</b><span>fewer order errors</span></div>
+      <div class="stat-block"><b class="counter" data-target="18" data-suffix="%">0</b><span>higher avg. ticket size</span></div>
+      <div class="stat-block"><b class="counter" data-target="99" data-suffix=".95%">0</b><span>platform uptime</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="quote-panel reveal">
+      <span class="quote-mark">“</span>
+      <div>
+        <blockquote>We ran six locations on four different tools before Cravex. Now one dashboard tells us what's cooking, what's low, and what's late — everywhere, at once.</blockquote>
+        <div class="quote-attr">
+          <span class="quote-avatar"></span>
+          <span>Operations Director, multi-location cloud kitchen group</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="cta-banner reveal">
+      <div>
+        <h2>Ready to run your kitchen on one system?</h2>
+        <p>Talk to us for 20 minutes and we'll show you Cravex running on a menu like yours.</p>
+      </div>
+      <a href="#" class="btn-primary">Book a demo</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo"><span class="mark"></span>Cravex Digital</div>
+        <p>Ordering, kitchen routing, delivery and inventory for restaurant groups and cloud kitchens — run from one system.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#services">Ordering</a></li>
+          <li><a href="#services">Kitchen routing</a></li>
+          <li><a href="#services">Inventory</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Partners</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get started</h4>
+        <ul>
+          <li><a href="#contact">Book a demo</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Support</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Cravex Digital. All rights reserved.</span>
+      <span>Made for kitchens that don't stop.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // header scroll state
+  var header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 12) header.classList.add('scrolled');
+    else header.classList.remove('scrolled');
+  });
+
+  // 3D tilt on hover for service cards
+  document.querySelectorAll('.tilt-card').forEach(function(card){
+    card.addEventListener('mousemove', function(e){
+      var rect = card.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      var cx = x / rect.width - 0.5;
+      var cy = y / rect.height - 0.5;
+      var rotateY = cx * 14;
+      var rotateX = cy * -14;
+      card.style.transform = 'perspective(900px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateY(-4px)';
+      card.style.setProperty('--mx', x + 'px');
+      card.style.setProperty('--my', y + 'px');
+    });
+    card.addEventListener('mouseleave', function(){
+      card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+    });
+  });
+
+  // mouse parallax on hero 3D stage
+  var stage = document.querySelector('.stage');
+  var orbit = document.querySelector('.orbit-system');
+  if (stage && orbit) {
+    stage.addEventListener('mousemove', function(e){
+      var rect = stage.getBoundingClientRect();
+      var px = (e.clientX - rect.left) / rect.width - 0.5;
+      var py = (e.clientY - rect.top) / rect.height - 0.5;
+      orbit.style.transform = 'rotateY(' + (px * 22) + 'deg) rotateX(' + (6 - py * 16) + 'deg)';
+    });
+    stage.addEventListener('mouseleave', function(){
+      orbit.style.transform = '';
+    });
+  }
+
+  // scroll reveal
+  var revealEls = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  revealEls.forEach(function(el){ io.observe(el); });
+
+  // stat counters
+  var counters = document.querySelectorAll('.counter');
+  var counted = false;
+  function runCounters(){
+    if (counted) return;
+    counted = true;
+    counters.forEach(function(el){
+      var target = parseFloat(el.getAttribute('data-target'));
+      var suffix = el.getAttribute('data-suffix') || '';
+      var duration = 1400;
+      var start = null;
+      function step(ts){
+        if (!start) start = ts;
+        var progress = Math.min((ts - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        var value = Math.floor(eased * target);
+        el.textContent = value + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = target + suffix;
+      }
+      requestAnimationFrame(step);
+    });
+  }
+  var statsPanel = document.querySelector('.stats-panel');
+  if (statsPanel){
+    var statsIo = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          runCounters();
+          statsIo.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    statsIo.observe(statsPanel);
+  }
+</script>
+
+</body>
+</html>
